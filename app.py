@@ -18,7 +18,10 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
-CORS(app, origins=["https://prod.mobile.buildwithseamless.co"], supports_credentials=True)
+CORS(app, origins=["https://translation-frontend-rho.vercel.app",
+                   "https://translation-frontend-joshuailumas-projects.vercel.app",
+                   "https://translation-frontend-git-main-joshuailumas-projects.vercel.app",
+                   "https://translation-frontend-frpgyy5rj-joshuailumas-projects.vercel.app"], supports_credentials=True)
 socketio = SocketIO(app, cors_allowed_origins="*")
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "client-credentials.json"
 
@@ -78,7 +81,9 @@ def convert_audio_to_wav(input_path, output_path):
         return False
 
 @app.route('/speech-to-text', methods=['POST'])
+@jwt_required()
 def speech_to_text():
+    current_user = get_jwt_identity()
     if 'file' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
@@ -121,7 +126,9 @@ def speech_to_text():
     return jsonify({"transcript": transcript})
 
 @app.route('/translate', methods=['POST'])
+@jwt_required()
 def translate_text():
+    current_user = get_jwt_identity()
     data = request.json
     text = data.get("text")
     target_language = data.get("target_language", "es")
@@ -130,8 +137,9 @@ def translate_text():
     return jsonify({"translated_text": translation['translatedText']})
 
 @app.route('/text-to-speech', methods=['POST'])
+@jwt_required()
 def text_to_speech():
-
+    current_user = get_jwt_identity()
     data = request.json
     text = data.get("text")
     language_code = data.get("language_code", "es-US")
